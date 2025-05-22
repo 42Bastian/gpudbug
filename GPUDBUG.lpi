@@ -37,13 +37,13 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="18">
       <Unit0>
         <Filename Value="GPUDBUG.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="28" Y="11"/>
-        <UsageCount Value="30"/>
+        <UsageCount Value="35"/>
       </Unit0>
       <Unit1>
         <Filename Value="Unit1.pas"/>
@@ -52,64 +52,65 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="13" Y="2"/>
-        <UsageCount Value="30"/>
+        <TopLine Value="300"/>
+        <CursorPos X="26" Y="287"/>
+        <UsageCount Value="35"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="..\..\..\..\lazarus\lcl\include\treeview.inc"/>
+        <Filename Value="C:\lazarus\lcl\include\treeview.inc"/>
         <TopLine Value="414"/>
         <CursorPos Y="435"/>
         <UsageCount Value="10"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\..\..\..\lazarus\lcl\include\progressbar.inc"/>
+        <Filename Value="C:\lazarus\lcl\include\progressbar.inc"/>
         <TopLine Value="149"/>
         <CursorPos Y="170"/>
         <UsageCount Value="10"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\..\..\..\DOCUME~1\Orion_\LOCALS~1\Temp\testcompileroptions.pas"/>
+        <Filename Value="C:\DOCUME~1\Orion_\LOCALS~1\Temp\testcompileroptions.pas"/>
         <UsageCount Value="10"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\..\..\ATARI STe\_DEVELOP_\PI1\BMP2PI1.PAS"/>
+        <Filename Value="C:\ATARI STe\_DEVELOP_\PI1\BMP2PI1.PAS"/>
         <UnitName Value="BMP_To_PI1"/>
         <UsageCount Value="10"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\..\..\..\..\Applications\lazarus\fpc\3.2.2\sources\rtl\wince\windows.pp"/>
+        <Filename Value="C:\Applications\lazarus\fpc\3.2.2\sources\rtl\wince\windows.pp"/>
         <EditorIndex Value="-1"/>
         <UsageCount Value="10"/>
       </Unit6>
       <Unit7>
-        <Filename Value="..\..\..\..\..\Applications\lazarus\lcl\interfacebase.pp"/>
+        <Filename Value="C:\Applications\lazarus\lcl\interfacebase.pp"/>
         <UnitName Value="InterfaceBase"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="34" Y="30"/>
         <UsageCount Value="10"/>
       </Unit7>
       <Unit8>
-        <Filename Value="..\..\..\..\..\Applications\lazarus\lcl\include\intfbasewinapi.inc"/>
+        <Filename Value="C:\Applications\lazarus\lcl\include\intfbasewinapi.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="25" Y="1295"/>
         <UsageCount Value="10"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\..\..\..\..\Applications\lazarus\lcl\interfaces\fpmake.pp"/>
+        <Filename Value="C:\Applications\lazarus\lcl\interfaces\fpmake.pp"/>
         <EditorIndex Value="-1"/>
         <UsageCount Value="10"/>
       </Unit9>
       <Unit10>
-        <Filename Value="..\..\..\..\..\Applications\lazarus\lcl\include\progressbar.inc"/>
+        <Filename Value="C:\Applications\lazarus\lcl\include\progressbar.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="98"/>
         <CursorPos X="42" Y="182"/>
         <UsageCount Value="10"/>
       </Unit10>
       <Unit11>
-        <Filename Value="..\..\..\..\..\Applications\lazarus\lcl\interfaces\cocoa\cocoacollectionview.pas"/>
+        <Filename Value="C:\Applications\lazarus\lcl\interfaces\cocoa\cocoacollectionview.pas"/>
         <UnitName Value="CocoaCollectionView"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="106"/>
@@ -131,131 +132,158 @@
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit13>
       <Unit14>
-        <Filename Value="..\..\..\..\..\Applications\lazarus\lcl\interfaces\cocoa\cocoaint.pas"/>
+        <Filename Value="C:\Applications\lazarus\lcl\interfaces\cocoa\cocoaint.pas"/>
         <UnitName Value="CocoaInt"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="643"/>
         <CursorPos Y="664"/>
         <UsageCount Value="10"/>
       </Unit14>
+      <Unit15>
+        <Filename Value="C:\compiler\lazarus\lcl\controls.pp"/>
+        <UnitName Value="Controls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1694"/>
+        <CursorPos X="15" Y="1719"/>
+        <UsageCount Value="10"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="C:\compiler\lazarus\lcl\include\control.inc"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1984"/>
+        <CursorPos X="47" Y="1990"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="C:\compiler\lazarus\lcl\include\treeview.inc"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="2344"/>
+        <CursorPos Y="2372"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit17>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="436" Column="27" TopLine="399"/>
+        <Caret Line="1374" TopLine="1333"/>
       </Position1>
       <Position2>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="437" Column="27" TopLine="400"/>
+        <Caret Line="1353" TopLine="1333"/>
       </Position2>
       <Position3>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="439" Column="29" TopLine="402"/>
+        <Caret Line="1355" TopLine="1333"/>
       </Position3>
       <Position4>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="441" Column="29" TopLine="404"/>
+        <Caret Line="1362" TopLine="1333"/>
       </Position4>
       <Position5>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="199" Column="25"/>
+        <Caret Line="1370" TopLine="1333"/>
       </Position5>
       <Position6>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="25" Column="22"/>
+        <Caret Line="1371" TopLine="1333"/>
       </Position6>
       <Position7>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="32" Column="3"/>
+        <Caret Line="1374" TopLine="1333"/>
       </Position7>
       <Position8>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="265" Column="72" TopLine="254"/>
+        <Filename Value="Unit1.pas"/>
+        <Caret Line="1353" TopLine="1333"/>
       </Position8>
       <Position9>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="282" Column="40" TopLine="254"/>
+        <Filename Value="Unit1.pas"/>
+        <Caret Line="1355" TopLine="1333"/>
       </Position9>
       <Position10>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="1226" Column="19" TopLine="1193"/>
+        <Filename Value="Unit1.pas"/>
+        <Caret Line="1362" TopLine="1333"/>
       </Position10>
       <Position11>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="41" Column="60" TopLine="20"/>
+        <Filename Value="Unit1.pas"/>
+        <Caret Line="1370" TopLine="1333"/>
       </Position11>
       <Position12>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="40" Column="16" TopLine="40"/>
+        <Filename Value="Unit1.pas"/>
+        <Caret Line="1371" TopLine="1333"/>
       </Position12>
       <Position13>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="1295" Column="3" TopLine="1293"/>
+        <Filename Value="Unit1.pas"/>
+        <Caret Line="1374" TopLine="1333"/>
       </Position13>
       <Position14>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="35" Column="6" TopLine="14"/>
+        <Filename Value="Unit1.pas"/>
+        <Caret Line="1353" TopLine="1333"/>
       </Position14>
       <Position15>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="40" Column="28" TopLine="20"/>
+        <Filename Value="Unit1.pas"/>
+        <Caret Line="1355" TopLine="1333"/>
       </Position15>
       <Position16>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="36" Column="47" TopLine="20"/>
+        <Caret Line="1362" TopLine="1333"/>
       </Position16>
       <Position17>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="34" Column="27"/>
+        <Caret Line="1370" TopLine="1333"/>
       </Position17>
       <Position18>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="1227" Column="11" TopLine="1206"/>
+        <Caret Line="1353" Column="11" TopLine="1333"/>
       </Position18>
       <Position19>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="1219" Column="27" TopLine="1207"/>
+        <Caret Line="196" TopLine="169"/>
       </Position19>
       <Position20>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="281" Column="6" TopLine="261"/>
+        <Caret Line="1352" TopLine="1325"/>
       </Position20>
       <Position21>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="263" Column="17" TopLine="261"/>
+        <Caret Line="196" TopLine="169"/>
       </Position21>
       <Position22>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="304" Column="38" TopLine="276"/>
+        <Caret Line="228" TopLine="201"/>
       </Position22>
       <Position23>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="291" Column="18" TopLine="271"/>
+        <Caret Line="262" Column="34" TopLine="239"/>
       </Position23>
       <Position24>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="297" Column="18" TopLine="277"/>
+        <Caret Line="1182" Column="5" TopLine="1157"/>
       </Position24>
       <Position25>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="299" Column="8" TopLine="279"/>
+        <Caret Line="1477" TopLine="1450"/>
       </Position25>
       <Position26>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="301" Column="37" TopLine="281"/>
+        <Caret Line="196" TopLine="169"/>
       </Position26>
       <Position27>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="287" TopLine="282"/>
+        <Caret Line="1352" TopLine="1325"/>
       </Position27>
       <Position28>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="300" Column="32" TopLine="280"/>
+        <Caret Line="196" TopLine="169"/>
       </Position28>
       <Position29>
         <Filename Value="Unit1.pas"/>
-        <Caret Line="288" Column="117"/>
+        <Caret Line="1372" Column="62" TopLine="1350"/>
       </Position29>
+      <Position30>
+        <Filename Value="Unit1.pas"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -273,18 +301,17 @@
         <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
-    <CodeGeneration>
-      <Optimizations>
-        <OptimizationLevel Value="2"/>
-      </Optimizations>
-    </CodeGeneration>
     <Linking>
       <Debugging>
-        <GenerateDebugInfo Value="False"/>
         <DebugInfoType Value="dsDwarf3"/>
         <UseLineInfoUnit Value="False"/>
         <StripSymbols Value="True"/>
       </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
     </Linking>
     <Other>
       <WriteFPCLogo Value="False"/>
@@ -297,15 +324,40 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <BreakPoints Count="1">
+    <Watches Count="9">
       <Item1>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="Unit1.pas"/>
-        <Line Value="287"/>
+        <Expression Value="adrs"/>
+        <DisplayFormat NumInherit="False" Num="vdfBaseHex"/>
       </Item1>
-    </BreakPoints>
+      <Item2>
+        <Expression Value="LoadAddress"/>
+        <DisplayFormat NumInherit="False" Num="vdfBaseHex"/>
+      </Item2>
+      <Item3>
+        <Expression Value="GPUPC"/>
+        <DisplayFormat NumInherit="False" Num="vdfBaseHex"/>
+      </Item3>
+      <Item4>
+        <Expression Value="walk"/>
+      </Item4>
+      <Item5>
+        <Expression Value="GPUram"/>
+      </Item5>
+      <Item6>
+        <Expression Value="LoadAddress"/>
+        <DisplayFormat NumInherit="False" Num="vdfBaseHex"/>
+      </Item6>
+      <Item7>
+        <Expression Value="ProgramSize"/>
+      </Item7>
+      <Item8>
+        <Expression Value="GPUBP"/>
+        <DisplayFormat NumInherit="False" Num="vdfBaseHex"/>
+      </Item8>
+      <Item9>
+        <Expression Value="MemorySize"/>
+      </Item9>
+    </Watches>
     <Exceptions Count="2">
       <Item1>
         <Name Value="ECodetoolError"/>

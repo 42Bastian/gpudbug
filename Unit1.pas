@@ -85,7 +85,9 @@ type
 
 var
   GDBUG: TGDBUG;
-  MemoryBuffer : ^byte;
+  GPUram : ^byte;
+  DSPram : ^byte;
+  MAINram : ^byte;
   MemorySize : integer;
   ProgramSize : integer;
   CodeViewCurPos : integer;
@@ -149,9 +151,20 @@ Var
   adrs, size, i : integer;
   opcode : byte;
   walk : ^byte;
+  offset : integer;
 Begin
-  walk := @MemoryBuffer^;
-  Inc(walk, LoadAddress);
+  if  LoadAddress < $200000 then begin
+   walk := @MAINram^;
+   offset := 0;
+  end
+  else if LoadAddress < $f04000 then begin
+   walk := @GPUram^;
+   offset := LoadAddress - $f02100;
+   end else begin
+  walk := @DSPram^;
+  offset := LoadAddress - $f1b000;
+  end;
+  Inc(walk, offset);
   size := ProgramSize;
   adrs := LoadAddress;
   CodeViewCurPos := 0;
@@ -264,10 +277,63 @@ var
   value : integer;
 Begin
   LoadAddress := adrs;
+  if LoadAddress < $200000 then begin
+     MemorySize := $200000;
+     walk := @MAINram^;
+  end
+  else if LoadAddress < $f04000 then begin
+     MemorySize := $1F00;
+     walk := @GPUram^;
+     adrs := adrs - $f02100;
+  end
+  else begin
+     MemorySize := $2000;
+     walk := @DSPram^;
+     adrs := adrs - $f1b000;
+  end;
   Try
     AssignFile(f, fl);
     Reset(f);
-    if FileSize(f) > (MemorySize - LoadAddress) then
+
+    ProgramSize := FileSize(f);
+    if ProgramSize > 12  then Begin
+          BlockRead(f, walk^, 12);
+          value :=          (walk^ shl 24); Inc(walk);
+          value := value or (walk^ shl 16); Inc(walk);
+          value := value or (walk^ shl 8) ; Inc(walk);
+          value := value or  walk^        ; Inc(walk);
+
+          if value = $42533934 then Begin
+       	     value :=          (walk^ shl 24); Inc(walk);
+     	     value := value or (walk^ shl 16); Inc(walk);
+     	     value := value or (walk^ shl 8) ; Inc(walk);
+     	     value := value or  walk^        ; Inc(walk);
+     	     LoadAddress := value;
+             adrs := value;
+             Inc(walk,4);
+             ProgramSize -= 12;
+             if LoadAddress < $200000 then begin
+                 MemorySize := $200000;
+                 walk := @MAINram^;
+             end
+             else if LoadAddress < $f04000 then begin
+                 MemorySize := $1000+$f00;
+                 walk := @GPUram^;
+                 adrs := adrs - $f02100;
+             end
+             else begin
+                 MemorySize := $2000;
+                 walk := @DSPram^;
+                 adrs := adrs - $f1b000;
+             end
+          end
+          else begin
+            Reset(f);
+            Dec(walk,4);
+          end
+    end;
+
+    if ProgramSize > (MemorySize - adrs) then
     Begin
       str := 'File too large !';
       {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
@@ -275,32 +341,7 @@ Begin
     End
     Else
     Begin
-      ProgramSize := FileSize(f);
-      walk := @MemoryBuffer^;
       Inc(walk, adrs);
-      if ProgramSize > 12  then
-	 Begin
-
-	    walk2 := walk;
-	    BlockRead(f, walk^, 12);
-	    value :=          (walk2^ shl 24); Inc(walk2);
-	    value := value or (walk2^ shl 16); Inc(walk2);
-	    value :=value or (walk2^ shl 8) ; Inc(walk2);
-	    value :=value or  walk2^        ; Inc(walk2);
-	    Inc(walk,12);
-	    if value = $42533934 then
-	       Begin
-		  value :=          (walk2^ shl 24); Inc(walk2);
-		  value := value or (walk2^ shl 16); Inc(walk2);
-		  value :=value or (walk2^ shl 8) ; Inc(walk2);
-		  value :=value or  walk2^        ; Inc(walk2);
-		  LoadAddress := value;
-		  walk := @MemoryBuffer^;
-		  Inc(walk,LoadAddress);
-{		  TGDBUG.LoadAddressEdit.Text := '$' + IntToHex(LoadAddress, 8);}
-		 end;
-	    ProgramSize := ProgramSize - 12;
-       end;
       BlockRead(f, walk^, ProgramSize);
     End;
     CloseFile(f);
@@ -326,11 +367,24 @@ begin
     {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
   End;
 
-  memadrs := adrs;
-  if (memadrs >= 0) and ((memadrs + 4) <= MemorySize) then
+  if adrs < $200000 then begin
+   walk := @MAINram^;
+   MemorySize := $200000;
+  end
+  else if adrs < $f04000 then begin
+   walk := @GPUram^;
+   MemorySize := $1F00;
+   adrs := adrs - $f02100;
+  end
+  else begin
+    walk := @DSPram^;
+    MemorySize := $2000;
+    adrs := adrs - $f1b000;
+  end;
+
+  if (adrs >= 0) and ((adrs + 4) <= MemorySize) then
   Begin
-    walk := @MemoryBuffer^;
-    Inc(walk, memadrs);
+    Inc(walk, adrs);
 
     value :=          (walk^ shl 24); Inc(walk);
     value := value or (walk^ shl 16); Inc(walk);
@@ -376,35 +430,46 @@ Var
   value, memadrs : integer;
   str : string;
 begin
-  memadrs := adrs;
-  adrs := adrs and $FFFFFFFE;
-  if (memadrs <> adrs) and (GDBUG.MemWarn.Checked = false) then
+  if ( (adrs and 1)<> 0) and (GDBUG.MemWarn.Checked = false) then
   Begin
     str := 'ReadWord not on a Word aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
     {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
   End;
 
-  {
-  if (CheckInternalRam(memadrs) = true) and (nochk = false) then
-    MessageBox(0, 'ReadWord not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);
-}
-
-  memadrs := adrs;
-  if (memadrs >= 0) and ((memadrs + 2) <= MemorySize) then
-  Begin
-    walk := @MemoryBuffer^;
-    Inc(walk, memadrs);
-
-    value :=          (walk^ shl 8) ; Inc(walk);
-    value := value or  walk^        ; Inc(walk);
-    GPUReadWord := value;
-  End
-  Else If GDBUG.MemWarn.Checked = false then
-  Begin
-    str := 'ReadWord outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+  if (adrs > $1fffff) and not nochk then begin
+{    MessageBox(0, 'ReadWord not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);}
     GPUReadWord := -1;
-  End;
+  end
+  else begin
+     if adrs < $200000 then begin
+      walk := @MAINram^;
+      MemorySize := $200000;
+     end
+     else if adrs < $f04000 then begin
+      walk := @GPUram^;
+      MemorySize := $1F00;
+      adrs := adrs - $f02100;
+     end
+     else begin
+       walk := @DSPram^;
+       MemorySize := $2000;
+       adrs := adrs - $f1b000;
+     end;
+    if (adrs >= 0) and ((adrs + 2) <= MemorySize) then
+    Begin
+         Inc(walk, adrs);
+
+         value :=          (walk^ shl 8) ; Inc(walk);
+         value := value or  walk^        ; Inc(walk);
+         GPUReadWord := value;
+     End
+     Else If GDBUG.MemWarn.Checked = false then
+     Begin
+        str := 'ReadWord outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
+    {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+       GPUReadWord := -1;
+     End;
+  end;
 End;
 
 
@@ -414,15 +479,15 @@ Var
   value, memadrs : integer;
   str : string;
 begin
-  memadrs := adrs;
-
-  {
-  if CheckInternalRam(memadrs) = true then
-  MessageBox(0, 'ReadByte not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);
-   }
-  if (memadrs >= 0) and (memadrs < MemorySize) then
+  MemorySize := $200000;
+  if adrs > $1fffff then begin
+  {MessageBox(0, 'ReadByte not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);}
+  GPUReadByte := -1;
+  end
+  else
+  if (adrs >= 0) and (adrs < MemorySize) then
   Begin
-    walk := @MemoryBuffer^;
+    walk := @MAINram^;
     Inc(walk, memadrs);
     value := walk^;
     GPUReadByte := value;
@@ -474,19 +539,30 @@ Var
   memadrs : integer;
   str : string;
 begin
-  memadrs := adrs;
-  adrs := adrs and $FFFFFFFC;
-  if (memadrs <> adrs) and (GDBUG.MemWarn.Checked = false) then
+    if adrs < $200000 then begin
+   walk := @MAINram^;
+   MemorySize := $200000;
+  end
+  else if adrs < $f04000 then begin
+   walk := @GPUram^;
+   MemorySize := $1F00;
+   adrs := adrs - $f02100;
+  end
+  else begin
+    walk := @DSPram^;
+    MemorySize := $2000;
+    adrs := adrs - $f1b000;
+  end;
+
+  if (adrs and 3 <> 0 ) and (GDBUG.MemWarn.Checked = false) then
   Begin
     str := 'WriteLong not on a Long aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
     {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
   End;
 
-  memadrs := adrs;
-  if (memadrs >= 0) and ((memadrs + 4) <= MemorySize) then
+  if (adrs >= 0) and ((adrs + 4) <= MemorySize) then
   Begin
-    walk := @MemoryBuffer^;
-    Inc(walk, memadrs);
+    Inc(walk, adrs);
 
     walk^ := (data shr 24) and $FF; Inc(walk);
     walk^ := (data shr 16) and $FF; Inc(walk);
@@ -522,7 +598,7 @@ begin
   memadrs := adrs;
   if (memadrs >= 0) and ((memadrs + 2) <= MemorySize) then
   Begin
-    walk := @MemoryBuffer^;
+    walk := @MAINram^;
     Inc(walk, memadrs);
 
     walk^ := (data shr  8) and $FF; Inc(walk);
@@ -550,7 +626,7 @@ begin
 
   if (memadrs >= 0) and (memadrs < MemorySize) then
   Begin
-    walk := @MemoryBuffer^;
+    walk := @MAINram^;
     Inc(walk, memadrs);
     walk^ := data and $FF;
   End
@@ -1103,7 +1179,7 @@ Begin
     GPUPC := JMPPC;
     jumpbuffered := false;
     JumpBuffLabelUpdate;
-    CheckGPUPC;
+  //  CheckGPUPC;
     UpdateGPUPCView;
   End;
 End;
@@ -1119,11 +1195,21 @@ Var
 Begin
   GDBUG.CodeView.Items.Clear;
   node := GDBUG.CodeView.Items.GetFirstNode;
-
-  walk := @MemoryBuffer^;
-  Inc(walk, LoadAddress);
-  size := ProgramSize;
   adrs := LoadAddress;
+  size := ProgramSize;
+
+  if LoadAddress <= $200000 then begin
+  walk := @MAINram^;
+  value := LoadAddress;
+  end else if LoadAddress < $f04000 then begin
+  walk := @GPUram^;
+  value :=  LoadAddress - $f02100
+
+  end else begin
+    walk := @DSPram^;
+    value := LoadAddress - $f1b000;
+  end;
+  Inc(walk, value);
 
   While size > 1 do
   Begin
@@ -1177,8 +1263,8 @@ Begin
                 instr := instr + '(r' + IntToStr(reg1) + ')';
               End;
          41 : instr := 'load   (r' + IntToStr(reg1) + '),r' + IntToStr(reg2);
-         43 : instr := 'load   (r14+' + IntToStr(reg1) + '),r' + IntToStr(reg2);
-         44 : instr := 'load   (r15+' + IntToStr(reg1) + '),r' + IntToStr(reg2);
+         43 : instr := 'load   (r14+' + IntToStr(reg1*4) + '),r' + IntToStr(reg2) + ' ; $'+IntToHex(reg1*4,2);
+         44 : instr := 'load   (r15+' + IntToStr(reg1*4) + '),r' + IntToStr(reg2) + ' ; $'+IntToHex(reg1*4,2);
          58 : instr := 'load   (r14+r' + IntToStr(reg1) + '),r' + IntToStr(reg2);
          59 : instr := 'load   (r15+r' + IntToStr(reg1) + '),r' + IntToStr(reg2);
          39 : instr := 'loadb  (r' + IntToStr(reg1) + '),r' + IntToStr(reg2);
@@ -1217,8 +1303,8 @@ Begin
          24 : instr := 'shlq   #' + IntToStr(32-reg1) + ',r' + IntToStr(reg2);
          25 : instr := 'shrq   #' + IntToStr(reg1) + ',r' + IntToStr(reg2);
          47 : instr := 'store  r' + IntToStr(reg2) + ',(r' + IntToStr(reg1) + ')';
-         49 : instr := 'store  r' + IntToStr(reg2) + ',(r14+' + IntToStr(reg1) + ')';
-         50 : instr := 'store  r' + IntToStr(reg2) + ',(r15+' + IntToStr(reg1) + ')';
+         49 : instr := 'store  r' + IntToStr(reg2) + ',(r14+' + IntToStr(reg1*4) + ') ; $'+IntToHex(reg1*4,2);
+         50 : instr := 'store  r' + IntToStr(reg2) + ',(r15+' + IntToStr(reg1*4) + ') ; $'+IntToHex(reg1*4,2);
          60 : instr := 'store  r' + IntToStr(reg2) + ',(r14+r' + IntToStr(reg1) + ')';
          61 : instr := 'store  r' + IntToStr(reg2) + ',(r15+r' + IntToStr(reg1) + ')';
          45 : instr := 'storeb r' + IntToStr(reg2) + ',(r' + IntToStr(reg1) + ')';
@@ -1373,8 +1459,10 @@ var
   str : string;
 begin
   MemorySize := $F1D000;
-  GetMem(MemoryBuffer, MemorySize);
-  if MemoryBuffer = nil then
+  GetMem(MAINram, $200000);
+  GetMem(GPUram, $1000+($3000-$2100));
+  GetMem(DSPram, $2000);
+  if (MAINram = nil) or (GPUram = nil) or (DSPram = nil) then
   Begin
 {    MessageBox(0, 'Not enough memory ! (need ~15Meg)', 'Error', MB_OK or MB_ICONERROR);}
     Application.Terminate;
@@ -1398,7 +1486,9 @@ end;
 
 procedure TGDBUG.FormDestroy(Sender: TObject);
 begin
-  FreeMemory(MemoryBuffer);
+  FreeMemory(MAINram);
+  FreeMemory(GPUram);
+  FreeMemory(DSPram);
 end;
 
 procedure TGDBUG.ResetGPUButtonClick(Sender: TObject);
