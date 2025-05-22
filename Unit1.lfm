@@ -8,7 +8,7 @@ object GDBUG: TGDBUG
   ActiveControl = Button1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'Jaguar GPU Debugger v0.8 beta - by Orion_ [2007-2008/2025]'
+  Caption = 'Jaguar GPU Simulator/Debugger '
   ClientHeight = 678
   ClientWidth = 938
   Font.Height = -11
