@@ -5,3 +5,5 @@
 backup
 *.res
 *.ppu
+bin
+obj

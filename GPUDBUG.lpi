@@ -52,8 +52,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="280"/>
-        <CursorPos X="82" Y="300"/>
+        <TopLine Value="281"/>
+        <CursorPos X="124" Y="288"/>
         <UsageCount Value="30"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -132,7 +132,7 @@
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit13>
       <Unit14>
-        <Filename Value="..\..\..\..\..\..\Applications\lazarus\lcl\interfaces\cocoa\cocoaint.pas"/>
+        <Filename Value="..\..\..\..\..\Applications\lazarus\lcl\interfaces\cocoa\cocoaint.pas"/>
         <UnitName Value="CocoaInt"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="643"/>
@@ -266,8 +266,12 @@
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="bin\gpudbug"/>
+    </Target>
     <SearchPaths>
       <IncludeFiles Value="."/>
+      <UnitOutputDirectory Value="obj"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
@@ -286,13 +290,9 @@
         <UseLineInfoUnit Value="False"/>
         <StripSymbols Value="True"/>
       </Debugging>
-      <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
-      </Options>
     </Linking>
     <Other>
+      <WriteFPCLogo Value="False"/>
       <ExecuteBefore>
         <ScanForFPCMsgs Value="True"/>
       </ExecuteBefore>
