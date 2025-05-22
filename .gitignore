@@ -1,0 +1,7 @@
+*.sh
+*.app
+*.compiled
+*.o
+backup
+*.res
+*.ppu
