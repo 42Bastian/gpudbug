@@ -279,7 +279,6 @@ var
   f : File of byte;
   str : string;
   walk : ^byte;
-  walk2 : ^byte;
   value : integer;
 Begin
   LoadAddress := adrs;
@@ -430,21 +429,21 @@ End;
 
 
 
-Function GPUReadWord(adrs : integer; nochk : bool) : integer;
+Function GPUReadWord(adrs : integer; nochk : bool) : word;
 Var
   walk : ^byte;
-  value, memadrs : integer;
+  value: integer;
   str : string;
 begin
   if ( (adrs and 1)<> 0) and (GDBUG.MemWarn.Checked = false) then
   Begin
-    str := 'ReadWord not on a Word aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
+    {str := 'ReadWord not on a Word aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
+    MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
   End;
 
   if (adrs > $1fffff) and not nochk then begin
 {    MessageBox(0, 'ReadWord not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);}
-    GPUReadWord := -1;
+    GPUReadWord := Word(-1);
   end
   else begin
      if adrs < $200000 then begin
@@ -473,7 +472,7 @@ begin
      Begin
         str := 'ReadWord outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
     {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
-       GPUReadWord := -1;
+       GPUReadWord := Word(-1);
      End;
   end;
 End;
@@ -482,7 +481,7 @@ End;
 Function GPUReadByte(adrs : integer) : integer;
 Var
   walk : ^byte;
-  value, memadrs : integer;
+  value : integer;
   str : string;
 begin
   MemorySize := $200000;
@@ -494,7 +493,7 @@ begin
   if (adrs >= 0) and (adrs < MemorySize) then
   Begin
     walk := @MAINram^;
-    Inc(walk, memadrs);
+    Inc(walk, adrs);
     value := walk^;
     GPUReadByte := value;
   End
@@ -607,13 +606,18 @@ begin
     {MessageBox(0, 'WriteWord not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);}
 
   memadrs := adrs;
-  if (memadrs >= 0) and ((memadrs + 2) <= MemorySize) then
+  if (memadrs >= 0) and ((memadrs + 2) < $200000) then
   Begin
     walk := @MAINram^;
     Inc(walk, memadrs);
 
     walk^ := (data shr  8) and $FF; Inc(walk);
     walk^ :=  data         and $FF; Inc(walk);
+     if (memadrs >= $100000) and (memadrs < $100100 ) then begin
+       data := GPUReadLong(memadrs);
+       memadrs := (memadrs - $100000) shr 2;
+       GDBUG.MemDump.EditorTextChanged(1+(memadrs and 7),1+(memadrs shr 3),IntToHex(data,8));
+    end;
   End
   Else If GDBUG.MemWarn.Checked = false then
   Begin
@@ -640,6 +644,11 @@ begin
     walk := @MAINram^;
     Inc(walk, memadrs);
     walk^ := data and $FF;
+    if (memadrs >= $100000) and (memadrs < $100100 ) then begin
+       data := GPUReadLong(memadrs);
+       memadrs := (memadrs - $100000) shr 2;
+       GDBUG.MemDump.EditorTextChanged(1+(memadrs and 7),1+(memadrs shr 3),IntToHex(data,8));
+    end;
   End
   Else If GDBUG.MemWarn.Checked = false then
   Begin
@@ -1379,7 +1388,7 @@ Begin
     Else
     Begin
       w := GPUReadWord(GPUPC, true);
-      if w <> -1 then
+      if w <> Word(-1) then
         GPUStep(w, true);
     End;
     Application.ProcessMessages;
@@ -1440,7 +1449,7 @@ begin
   Else
   Begin
     w := GPUReadWord(GPUPC, true);
-    if w <> -1 then
+    if w <> Word(-1) then
     Begin
       noPCrefresh := false;
 
@@ -1539,7 +1548,7 @@ begin
   Else
   Begin
     w := GPUReadWord(GPUPC, true);
-    if w <> -1 then
+    if w <> Word(-1) then
     Begin
       noPCrefresh := false;
 
@@ -1590,8 +1599,6 @@ end;
 
 
 procedure TGDBUG.RunGPUButtonClick(Sender: TObject);
-var
-  value : integer;
 begin
   if gpurun = false then
   Begin
