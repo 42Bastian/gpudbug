@@ -14,6 +14,7 @@ object GDBUG: TGDBUG
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   KeyPreview = True
+  LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp

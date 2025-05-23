@@ -239,6 +239,7 @@ Begin
   UpdatePCView;
   UpdateRegView;
   UpdateFlagView;
+  UpdateGPUPCView;
 End;
 
 
