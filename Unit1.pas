@@ -23,7 +23,7 @@ interface
 {Windows}
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, Buttons, FPImage,
-  StdCtrls, ComCtrls, LCLType;
+  StdCtrls, ComCtrls, LCLType, ValEdit, Grids;
 
 type
 
@@ -36,6 +36,7 @@ type
     CodeView: TTreeView;
     ImageList: TImageList;
     JUMPLabel: TLabel;
+    MemDump: TStringGrid;
     ToggleBox1: TToggleBox;
     RegBank0: TTreeView;
     RegBank1: TTreeView;
@@ -57,9 +58,14 @@ type
     GPUMode: TRadioButton;
     DSPMode: TRadioButton;
     Label5: TLabel;
+    ValueListEditor1: TValueListEditor;
     procedure Button1Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure GPUModeChange(Sender: TObject);
+    procedure MemDumpButtonClick(Sender: TObject; aCol, aRow: Integer);
+    procedure MemDumpDblClick(Sender: TObject);
+    procedure MemDumpSelectCell(Sender: TObject; aCol, aRow: Integer;
+      var CanSelect: Boolean);
     procedure SkipButtonClick(Sender: TObject);
     procedure CodeViewMouseUp(Sender: TOBject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -556,7 +562,7 @@ begin
 
   if (adrs and 3 <> 0 ) and (GDBUG.MemWarn.Checked = false) then
   Begin
-    str := 'WriteLong not on a Long aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
+    //str := 'WriteLong not on a Long aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
     {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
   End;
 
@@ -568,6 +574,11 @@ begin
     walk^ := (data shr 16) and $FF; Inc(walk);
     walk^ := (data shr  8) and $FF; Inc(walk);
     walk^ :=  data         and $FF; Inc(walk);
+
+    if (adrs >= $100000) and (adrs < $100100 ) then begin
+       adrs := (adrs - $100000) shr 2;
+       GDBUG.MemDump.EditorTextChanged(1+(adrs and 7),1+(adrs shr 3),IntToHex(data,8));
+    end;
   End
   Else If GDBUG.MemWarn.Checked = false then
   Begin
@@ -1404,6 +1415,22 @@ begin
 
 end;
 
+procedure TGDBUG.MemDumpButtonClick(Sender: TObject; aCol, aRow: Integer);
+begin
+
+end;
+
+procedure TGDBUG.MemDumpDblClick(Sender: TObject);
+begin
+
+end;
+
+procedure TGDBUG.MemDumpSelectCell(Sender: TObject; aCol, aRow: Integer;
+  var CanSelect: Boolean);
+begin
+
+end;
+
 procedure TGDBUG.SkipButtonClick(Sender: TObject);
 var
   w : word;
@@ -1455,7 +1482,7 @@ end;
 procedure TGDBUG.FormCreate(Sender: TObject);
 var
   node1, node2 : TTreeNode;
-  i : integer;
+  i,o : integer;
   str : string;
 begin
   MemorySize := $F1D000;
@@ -1482,6 +1509,13 @@ begin
     RegBank0.Items.Add(node1, 'r' + IntToStr(i) + ': ' + str + '$00000000');
     RegBank1.Items.Add(node2, 'r' + IntToStr(i) + ': ' + str + '$00000000');
   End;
+  for i := 0 to 7 do begin
+    for o := 0 to 7 do begin
+        MemDump.Cells[1+i,1+o] := '00000000';
+    end;
+  end;
+
+
 end;
 
 procedure TGDBUG.FormDestroy(Sender: TObject);
