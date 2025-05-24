@@ -14,7 +14,6 @@ object GDBUG: TGDBUG
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   KeyPreview = True
-  LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp
@@ -332,6 +331,14 @@ object GDBUG: TGDBUG
     Enabled = False
     TabOrder = 13
     OnClick = SkipButtonClick
+  end
+  object Loading0: TProgressBar
+    Left = 797
+    Height = 12
+    Top = 512
+    Width = 126
+    Anchors = []
+    TabOrder = 15
   end
   object ToggleBox1: TToggleBox
     Left = 704
