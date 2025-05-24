@@ -36,6 +36,7 @@ type
     CodeView: TTreeView;
     ImageList: TImageList;
     JUMPLabel: TLabel;
+    Loading0: TProgressBar;
     ToggleBox1: TToggleBox;
     RegBank0: TTreeView;
     RegBank1: TTreeView;
@@ -95,7 +96,7 @@ var
   RegStatus : integer;
   JMPPC, GPUPC, GPUBP, ZFlag, NFlag, CFlag : integer;
   jumpbuffered, noPCrefresh, gpurun : boolean;
-
+  
 
 const
      IMG_NODE_NOTHING = 0;
@@ -250,7 +251,7 @@ Begin
   if (GPUPC < 0) or (GPUPC > MemorySize) then
   Begin
     str := 'GPU PC outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(GPUPC, 8) + #13 + #10 + 'Resetting GPU !';
-    {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);  }
+    MessageDlg('Error', str, mtError, [mbOK], 0);
     ResetGPU;
   End;
 End;
@@ -271,7 +272,7 @@ Begin
     if FileSize(f) > (MemorySize - LoadAddress) then
     Begin
       str := 'File too large !';
-      {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+      MessageDlg('Error', str, mtError, [mbOK], 0);
       LoadBin := false;
     End
     Else
@@ -280,7 +281,7 @@ Begin
       walk := @MemoryBuffer^;
       Inc(walk, adrs);
       if ProgramSize > 12  then
-	 Begin
+	  Begin
 
 	    walk2 := walk;
 	    BlockRead(f, walk^, 12);
@@ -290,7 +291,7 @@ Begin
 	    value :=value or  walk2^        ; Inc(walk2);
 	    Inc(walk,12);
 	    if value = $42533934 then
-	       Begin
+	    Begin
 		  value :=          (walk2^ shl 24); Inc(walk2);
 		  value := value or (walk2^ shl 16); Inc(walk2);
 		  value :=value or (walk2^ shl 8) ; Inc(walk2);
@@ -299,14 +300,14 @@ Begin
 		  walk := @MemoryBuffer^;
 		  Inc(walk,LoadAddress);
 {		  TGDBUG.LoadAddressEdit.Text := '$' + IntToHex(LoadAddress, 8);}
-		 end;
+		end;
 	    ProgramSize := ProgramSize - 12;
-       end;
+      end;
       BlockRead(f, walk^, ProgramSize);
     End;
     CloseFile(f);
   Except
-    {MessageBox(0, 'Error while loading file.', 'Error', MB_OK or MB_ICONERROR);}
+    MessageDlg('Error', 'Error while loading file.', mtError, [mbOK], 0);
     LoadBin := false;
   End;
   LoadBin := true;
@@ -324,7 +325,7 @@ begin
   if (memadrs <> adrs) and (GDBUG.MemWarn.Checked = false) then
   Begin
     str := 'ReadLong not on a Long aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
+    MessageDlg('Warning', str, mtWarning, [mbOK], 0);
   End;
 
   memadrs := adrs;
@@ -342,7 +343,7 @@ begin
   Else If GDBUG.MemWarn.Checked = false then
   Begin
     str := 'ReadLong outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+    MessageDlg('Error', str, mtError, [mbOK], 0);
     GPUReadLong := -1;
   End;
 End;
@@ -382,13 +383,11 @@ begin
   if (memadrs <> adrs) and (GDBUG.MemWarn.Checked = false) then
   Begin
     str := 'ReadWord not on a Word aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
+    MessageDlg('Warning', str, mtWarning, [mbOK], 0);
   End;
 
-  {
   if (CheckInternalRam(memadrs) = true) and (nochk = false) then
-    MessageBox(0, 'ReadWord not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);
-}
+    MessageDlg('Warning', 'ReadWord not allowed in internal ram !', mtWarning, [mbOK], 0);
 
   memadrs := adrs;
   if (memadrs >= 0) and ((memadrs + 2) <= MemorySize) then
@@ -403,7 +402,7 @@ begin
   Else If GDBUG.MemWarn.Checked = false then
   Begin
     str := 'ReadWord outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+    MessageDlg('Error', str, mtError, [mbOK], 0);
     GPUReadWord := -1;
   End;
 End;
@@ -417,10 +416,9 @@ Var
 begin
   memadrs := adrs;
 
-  {
   if CheckInternalRam(memadrs) = true then
-  MessageBox(0, 'ReadByte not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);
-   }
+    MessageDlg('Warning', 'ReadByte not allowed in internal ram !', mtWarning, [mbOK], 0);
+
   if (memadrs >= 0) and (memadrs < MemorySize) then
   Begin
     walk := @MemoryBuffer^;
@@ -431,7 +429,7 @@ begin
   Else If GDBUG.MemWarn.Checked = false then
   Begin
     str := 'ReadByte outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
-   { MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+    MessageDlg('Error', str, mtError, [mbOK], 0);
     GPUReadByte := -1;
   End;
 End;
@@ -444,7 +442,7 @@ Begin
     If ((GPUReadLong(G_CTRL) and 1) = 0) and (gpurun = true) then
     Begin
       StopGPU;
-      {MessageBox(0, 'GPU Self Stopped !', 'Stop', MB_OK or MB_ICONEXCLAMATION);}
+      MessageDlg('Stop', 'GPU Self Stopped !', mtWarning, [mbOK], 0);
     End;
     CurRegBank := (GPUReadLong(G_FLAGS) shr 14) and 1;
     GDBUG.G_HIDATALabel.Caption := 'G_HIDATA: $' + IntToHex(GPUReadLong(G_HIDATA), 8);
@@ -455,7 +453,7 @@ Begin
     If ((GPUReadLong(D_CTRL) and 1) = 0) and (gpurun = true) then
     Begin
       StopGPU;
-      {MessageBox(0, 'DSP Self Stopped !', 'Stop', MB_OK or MB_ICONEXCLAMATION);}
+      MessageDlg('Stop', 'DSP Self Stopped !', mtWarning, [mbOK], 0);
     End;
     CurRegBank := (GPUReadLong(D_FLAGS) shr 14) and 1;
   End;
@@ -480,7 +478,7 @@ begin
   if (memadrs <> adrs) and (GDBUG.MemWarn.Checked = false) then
   Begin
     str := 'WriteLong not on a Long aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
+    MessageDlg('Warning', str, mtWarning, [mbOK], 0);
   End;
 
   memadrs := adrs;
@@ -497,7 +495,7 @@ begin
   Else If GDBUG.MemWarn.Checked = false then
   Begin
     str := 'WriteLong outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+    MessageDlg('Error', str, mtError, [mbOK], 0);
   End;
   MemWriteCheck;
 End;
@@ -514,11 +512,11 @@ begin
   if (memadrs <> adrs) and (GDBUG.MemWarn.Checked = false) then
   Begin
     str := 'WriteWord not on a Word aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
-    {MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
+    MessageDlg('Warning', str, mtWarning, [mbOK], 0);
   End;
 
   if CheckInternalRam(memadrs) = true then
-    {MessageBox(0, 'WriteWord not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);}
+    MessageDlg('Warning', 'WriteWord not allowed in internal ram !', mtWarning, [mbOK], 0);
 
   memadrs := adrs;
   if (memadrs >= 0) and ((memadrs + 2) <= MemorySize) then
@@ -532,7 +530,7 @@ begin
   Else If GDBUG.MemWarn.Checked = false then
   Begin
     str := 'WriteWord outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
-{    MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+    MessageDlg('Error', str, mtError, [mbOK], 0);
   End;
   MemWriteCheck;
 End;
@@ -547,7 +545,7 @@ begin
   memadrs := adrs;
 
   if CheckInternalRam(memadrs) = true then
-{    MessageBox(0, 'WriteByte not allowed in internal ram !', 'Warning', MB_OK or MB_ICONWARNING);}
+    MessageDlg('Warning', 'WriteByte not allowed in internal ram !', mtWarning, [mbOK], 0);
 
   if (memadrs >= 0) and (memadrs < MemorySize) then
   Begin
@@ -558,7 +556,7 @@ begin
   Else If GDBUG.MemWarn.Checked = false then
   Begin
     str := 'WriteByte outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
-{    MessageBox(0, PChar(str), 'Error', MB_OK or MB_ICONERROR);}
+    MessageDlg('Error', str, mtError, [mbOK], 0);
   End;
   MemWriteCheck;
 End;
@@ -1250,7 +1248,7 @@ Begin
 
     Dec(size, ecart);
     Inc(adrs, ecart);
-   { GDBUG._Loading.Position := 100 - ((size * 100) div ProgramSize);}
+    GDBUG.Loading0.Position := 100 - ((size * 100) div ProgramSize);
   End;
 
   curnode := GDBUG.CodeView.Items.GetFirstNode;
@@ -1270,14 +1268,14 @@ Begin
     if GPUPC = GPUBP then
     Begin
       str := 'Breakpoint at $' + IntToHex(GPUPC, 8) + ' !';
-{      MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
+      MessageDlg('Warning', str, mtWarning, [mbOK], 0);
       StopGPU;
     End
     else
     if GPUPC >= LoadAddress + ProgramSize then
     Begin
       str := 'Reached program end !' + #13 + #10 + 'Address = $' + IntToHex(GPUPC, 8);
-{      MessageBox(0, PChar(str), 'Warning', MB_OK or MB_ICONWARNING);}
+      MessageDlg('Warning', str, mtWarning, [mbOK], 0);
       StopGPU;
     End
     Else
@@ -1324,7 +1322,7 @@ var
   w : word;
 begin
   if CodeViewCurPos = CodeView.Items.Count then
-{MessageBox(0, 'Reached program end !', 'Warning', MB_OK or MB_ICONWARNING)}
+    MessageDlg('Warning', 'Reached program end !', mtWarning, [mbOK], 0)
   Else
   Begin
     w := GPUReadWord(GPUPC, true);
@@ -1377,7 +1375,7 @@ begin
   GetMem(MemoryBuffer, MemorySize);
   if MemoryBuffer = nil then
   Begin
-{    MessageBox(0, 'Not enough memory ! (need ~15Meg)', 'Error', MB_OK or MB_ICONERROR);}
+    MessageDlg('Error', 'Not enough memory ! (need ~15Meg)', mtError, [mbOK], 0);
     Application.Terminate;
   End;
 
@@ -1412,7 +1410,7 @@ var
   w : word;
 begin
   if CodeViewCurPos = CodeView.Items.Count then
-{    MessageBox(0, 'Reached program end !', 'Warning', MB_OK or MB_ICONWARNING)}
+    MessageDlg('Warning', 'Reached program end !', mtWarning, [mbOK], 0)
   Else
   Begin
     w := GPUReadWord(GPUPC, true);
