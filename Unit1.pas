@@ -31,6 +31,7 @@ type
 
   TGDBUG = class(TForm)
     Button1: TButton;
+    Button2: TButton;
     G_REMAINLabel: TLabel;
     SkipButton: TButton;
     CodeView: TTreeView;
@@ -59,7 +60,9 @@ type
     DSPMode: TRadioButton;
     Label5: TLabel;
     ValueListEditor1: TValueListEditor;
-    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure LoadClick(Sender: TObject);
+    procedure ReloadClick(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure GPUModeChange(Sender: TObject);
     procedure MemDumpButtonClick(Sender: TObject; aCol, aRow: Integer);
@@ -1398,20 +1401,51 @@ Begin
 End;
 
 
-procedure TGDBUG.Button1Click(Sender: TObject);
+function LoadFile(fileName: string): boolean;
+var
+   res : boolean;
 begin
-  If OpenDialog.Execute then
-  Begin
-    if LoadBin(OpenDialog.FileName, strtoint(LoadAddressEdit.Text)) = true then
-    Begin
-      Disassemble;
-      ResetGPU;
-      RunGPUButton.Enabled := true;
-      StepButton.Enabled := true;
-      SkipButton.Enabled := true;
-      ResetGPUButton.Enabled := true;
-    End;
-  End;
+  res := LoadBin(fileName, LoadAddress);
+  if res then begin
+    Disassemble;
+   ResetGPU;
+  end;
+  LoadFile := res;
+end;
+
+procedure TGDBUG.ReloadClick(Sender: TObject);
+begin
+  LoadAddress := StrToInt(LoadAddressEdit.Text);
+  If OpenDialog.Filename <> '' then begin
+    if LoadFile(OpenDialog.FileName) then begin
+
+     RunGPUButton.Enabled := true;
+     StepButton.Enabled := true;
+     SkipButton.Enabled := true;
+     ResetGPUButton.Enabled := true;
+    end;
+  end;
+end;
+
+procedure TGDBUG.Button2Click(Sender: TObject);
+begin
+
+end;
+
+procedure TGDBUG.LoadClick(Sender: TObject);
+begin
+  If OpenDialog.Execute then begin
+  LoadAddress := StrToInt(LoadAddressEdit.Text);
+  If OpenDialog.Filename <> '' then begin
+    if LoadFile(OpenDialog.FileName) then begin
+
+     RunGPUButton.Enabled := true;
+     StepButton.Enabled := true;
+     SkipButton.Enabled := true;
+     ResetGPUButton.Enabled := true;
+    end;
+  end;
+  end;
 end;
 
 procedure TGDBUG.Button4Click(Sender: TObject);
@@ -1575,6 +1609,15 @@ end;
 
 procedure TGDBUG.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+  if (Key = VK_F1) and (OpenDialog.FileName <> '') then begin
+    LoadAddress := StrToInt(LoadAddressEdit.Text);
+    if LoadFile(OpenDialog.FileName) then begin
+       RunGPUButton.Enabled := true;
+       StepButton.Enabled := true;
+       SkipButton.Enabled := true;
+       ResetGPUButton.Enabled := true;
+    end;
+  end;
   if Key = VK_F9 then
   Begin
     if RunGPUButton.Enabled = true then
@@ -1644,11 +1687,13 @@ end;
 procedure TGDBUG.GPUModeClick(Sender: TObject);
 begin
   LoadAddressEdit.Text := '$00F03000';
+  LoadAddress := $f03000;
 end;
 
 procedure TGDBUG.DSPModeClick(Sender: TObject);
 begin
   LoadAddressEdit.Text := '$00F1B000';
+  LoadAddress := $f1b000;
 end;
 
 procedure TGDBUG.GPUPCEditKeyDown(Sender: TObject; var Key: Word;

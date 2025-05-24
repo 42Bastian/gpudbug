@@ -14,7 +14,6 @@ object GDBUG: TGDBUG
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   KeyPreview = True
-  LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp
@@ -53,9 +52,9 @@ object GDBUG: TGDBUG
     ParentFont = False
   end
   object Label4: TLabel
-    Left = 888
+    Left = 912
     Height = 18
-    Top = 104
+    Top = 118
     Width = 13
     Caption = 'at'
     Font.Height = -15
@@ -64,7 +63,7 @@ object GDBUG: TGDBUG
     ParentFont = False
   end
   object FlagStatusLabel: TLabel
-    Left = 896
+    Left = 901
     Height = 18
     Top = 208
     Width = 124
@@ -75,7 +74,7 @@ object GDBUG: TGDBUG
     ParentFont = False
   end
   object GPUBPLabel: TLabel
-    Left = 910
+    Left = 915
     Height = 18
     Top = 184
     Width = 110
@@ -86,7 +85,7 @@ object GDBUG: TGDBUG
     ParentFont = False
   end
   object G_HIDATALabel: TLabel
-    Left = 858
+    Left = 863
     Height = 18
     Top = 237
     Width = 162
@@ -108,7 +107,7 @@ object GDBUG: TGDBUG
     ParentFont = False
   end
   object JUMPLabel: TLabel
-    Left = 891
+    Left = 896
     Height = 18
     Top = 288
     Width = 129
@@ -119,7 +118,7 @@ object GDBUG: TGDBUG
     ParentFont = False
   end
   object G_REMAINLabel: TLabel
-    Left = 854
+    Left = 859
     Height = 18
     Top = 262
     Width = 166
@@ -131,7 +130,7 @@ object GDBUG: TGDBUG
   end
   object Button1: TButton
     Cursor = crHandPoint
-    Left = 926
+    Left = 931
     Height = 21
     Top = 88
     Width = 94
@@ -141,7 +140,7 @@ object GDBUG: TGDBUG
     Font.Name = 'MS Sans Serif'
     ParentFont = False
     TabOrder = 0
-    OnClick = Button1Click
+    OnClick = LoadClick
   end
   object CodeView: TTreeView
     AnchorSideTop.Control = RegBank1Label
@@ -238,7 +237,7 @@ object GDBUG: TGDBUG
     Cursor = crHandPoint
     Left = 852
     Height = 21
-    Top = 896
+    Top = 904
     Width = 187
     BorderSpacing.InnerBorder = 4
     Caption = 'Exit'
@@ -246,7 +245,7 @@ object GDBUG: TGDBUG
     OnClick = Button4Click
   end
   object LoadAddressEdit: TEdit
-    Left = 929
+    Left = 934
     Height = 24
     Top = 112
     Width = 91
@@ -270,7 +269,7 @@ object GDBUG: TGDBUG
     OnClick = ResetGPUButtonClick
   end
   object GPUPCEdit: TEdit
-    Left = 931
+    Left = 936
     Height = 24
     Top = 154
     Width = 89
@@ -283,16 +282,16 @@ object GDBUG: TGDBUG
   end
   object MemWarn: TCheckBox
     Cursor = crHandPoint
-    Left = 888
+    Left = 893
     Height = 18
-    Top = 134
+    Top = 464
     Width = 132
     Caption = 'No memory warning'
     TabOrder = 10
   end
   object GPUMode: TRadioButton
     Cursor = crHandPoint
-    Left = 904
+    Left = 925
     Height = 19
     Top = 24
     Width = 100
@@ -308,7 +307,7 @@ object GDBUG: TGDBUG
   end
   object DSPMode: TRadioButton
     Cursor = crHandPoint
-    Left = 907
+    Left = 926
     Height = 19
     Top = 51
     Width = 99
@@ -433,6 +432,20 @@ object GDBUG: TGDBUG
       '$1c'
     )
   end
+  object Button2: TButton
+    Cursor = crHandPoint
+    Left = 792
+    Height = 21
+    Top = 88
+    Width = 118
+    BorderSpacing.InnerBorder = 4
+    Caption = 'Reload BIN (F1)'
+    Font.Height = -15
+    Font.Name = 'MS Sans Serif'
+    ParentFont = False
+    TabOrder = 17
+    OnClick = ReloadClick
+  end
   object ImageList: TImageList
     Left = 973
     Top = 582
@@ -447,8 +460,8 @@ object GDBUG: TGDBUG
     }
   end
   object OpenDialog: TOpenDialog
-    Title = 'Ouvrir un fichier existant'
-    DefaultExt = '.o'
+    Title = '∫'
+    DefaultExt = '.o,.bin'
     Filter = 'Lyxass file|*.o|GPU Code binary file|*.bin|Any file|*.*'
     FilterIndex = 0
     Left = 902
