@@ -64,10 +64,10 @@ LazarusResources.Add('TGDBUG','FORMDATA',[
   +'KeepCollapsedNodes'#11'tvoReadOnly'#19'tvoRightClickSelect'#14'tvoShowButto'
   +'ns'#11'tvoToolTips'#0#9'OnMouseUp'#7#15'RegBank1MouseUp'#0#0#7'TButton'#12
   +'RunGPUButton'#6'Cursor'#7#11'crHandPoint'#4'Left'#3#144#3#6'Height'#2#21#3
-  +'Top'#3#128#1#5'Width'#2'q'#7'Anchors'#11#0#25'BorderSpacing.InnerBorder'#2#4
+  +'Top'#3#152#1#5'Width'#2'q'#7'Anchors'#11#0#25'BorderSpacing.InnerBorder'#2#4
   ,#7'Caption'#6#12'Run GPU (F9)'#7'Enabled'#8#8'TabOrder'#2#4#7'OnClick'#7#17
   +'RunGPUButtonClick'#0#0#7'TButton'#10'StepButton'#6'Cursor'#7#11'crHandPoint'
-  +#4'Left'#3#144#3#6'Height'#2#21#3'Top'#3'@'#1#5'Width'#2'q'#7'Anchors'#11#0
+  +#4'Left'#3#144#3#6'Height'#2#21#3'Top'#3'X'#1#5'Width'#2'q'#7'Anchors'#11#0
   +#25'BorderSpacing.InnerBorder'#2#4#7'Caption'#6#10'Step (F10)'#7'Enabled'#8#8
   +'TabOrder'#2#5#7'OnClick'#7#15'StepButtonClick'#0#0#7'TButton'#7'Button4'#6
   +'Cursor'#7#11'crHandPoint'#4'Left'#3'T'#3#6'Height'#2#21#3'Top'#3#136#3#5'Wi'
@@ -76,7 +76,7 @@ LazarusResources.Add('TGDBUG','FORMDATA',[
   +'eft'#3#166#3#6'Height'#2#24#3'Top'#2'p'#5'Width'#2'['#11'Font.Height'#2#241
   +#9'Font.Name'#6#13'MS Sans Serif'#10'ParentFont'#8#8'TabOrder'#2#7#4'Text'#6
   +#9'$00F03000'#0#0#7'TButton'#14'ResetGPUButton'#6'Cursor'#7#11'crHandPoint'#4
-  +'Left'#3#144#3#6'Height'#2#21#3'Top'#3#160#1#5'Width'#2'q'#7'Anchors'#11#0#25
+  +'Left'#3#144#3#6'Height'#2#21#3'Top'#3#184#1#5'Width'#2'q'#7'Anchors'#11#0#25
   +'BorderSpacing.InnerBorder'#2#4#7'Caption'#6#15'Reset GPU (F12)'#7'Enabled'#8
   +#8'TabOrder'#2#8#7'OnClick'#7#19'ResetGPUButtonClick'#0#0#5'TEdit'#9'GPUPCEd'
   +'it'#4'Left'#3#168#3#6'Height'#2#24#3'Top'#3#154#0#5'Width'#2'Y'#11'Font.Hei'
@@ -92,7 +92,7 @@ LazarusResources.Add('TGDBUG','FORMDATA',[
   +'Left'#3#158#3#6'Height'#2#19#3'Top'#2'3'#5'Width'#2'c'#7'Caption'#6#8'DSP M'
   +'ode'#11'Font.Height'#2#241#9'Font.Name'#6#13'MS Sans Serif'#10'ParentFont'#8
   +#8'TabOrder'#2#12#7'OnClick'#7#12'DSPModeClick'#0#0#7'TButton'#10'SkipButton'
-  +#6'Cursor'#7#11'crHandPoint'#4'Left'#3#144#3#6'Height'#2#21#3'Top'#3'`'#1#5
+  +#6'Cursor'#7#11'crHandPoint'#4'Left'#3#144#3#6'Height'#2#21#3'Top'#3'x'#1#5
   +'Width'#2'q'#7'Anchors'#11#0#25'BorderSpacing.InnerBorder'#2#4#7'Caption'#6
   +#10'Skip (F11)'#7'Enabled'#8#8'TabOrder'#2#13#7'OnClick'#7#15'SkipButtonClic'
   +'k'#0#0#10'TToggleBox'#10'ToggleBox1'#4'Left'#3#128#4#6'Height'#2#25#3'Top'#3

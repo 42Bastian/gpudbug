@@ -94,19 +94,21 @@ type
   end;
 
 var
-  GDBUG: TGDBUG;
-  GPUram : ^byte;
-  DSPram : ^byte;
-  MAINram : ^byte;
-  MemorySize : integer;
-  ProgramSize : integer;
-  CodeViewCurPos : integer;
-  LoadAddress : integer;
-  CurRegBank : integer;
-  RegBank : Array [0..1,0..31] of integer;
-  RegStatus : integer;
+  GDBUG					   : TGDBUG;
+  GPUram				   : ^byte;
+  DSPram				   : ^byte;
+  MAINram				   : ^byte;
+  MemorySize				   : integer;
+  ProgramSize				   : integer;
+  CodeViewCurPos			   : integer;
+  LoadAddress				   : integer;
+  EndAddress				   : integer;
+  CurRegBank				   : integer;
+  RegBank				   : Array [0..1,0..31] of integer;
+  RegStatus				   : integer;
   JMPPC, GPUPC, GPUBP, ZFlag, NFlag, CFlag : integer;
-  jumpbuffered, noPCrefresh, gpurun : boolean;
+  jumpbuffered, noPCrefresh, gpurun	   : boolean;
+   memDumpBase				   : integer;
 
 
 const
@@ -125,8 +127,39 @@ const
      D_CTRL   = $F1A114;
      D_RAM    = $F1B000;
 
-implementation
 
+implementation
+                                                              
+       Function GPUReadLong(adrs : integer) : integer; forward;
+       Procedure GPUWriteLong(adrs, data : integer); forward;
+
+Procedure updateMemDump(memadrs : integer);
+Var
+   data : integer;
+begin
+   if (memadrs >= memDumpBase) and (memadrs < memDumpBase+$100 ) then begin
+      memadrs := memadrs and $fffffffc;
+       data := GPUReadLong(memadrs);
+       memadrs := (memadrs - memDumpBase) shr 2;
+       GDBUG.MemDump.EditorTextChanged(1+(memadrs and 7),1+(memadrs shr 3),IntToHex(data,8));
+    end;
+end;
+
+Procedure ResetMemDump;
+Var
+   x,y : integer;
+   mem : ^integer;
+Begin
+   mem := @MAINram^;
+   x := memDumpBase shr 2;
+   Inc(mem, x);
+   for x := 1 to 8 do
+      for y:= 1 to 8 do begin
+	 GDBUG.MemDump.EditorTextChanged(x,y,'00000000');
+	 mem^ := 0;
+	 Inc(mem,1);
+      end;
+end;
 
 Procedure UpdateRegView;
 Var
@@ -240,6 +273,7 @@ Begin
   NFlag := 0;
   CFlag := 0;
   GPUPC := LoadAddress;
+  GPUWriteLong(G_FLAGS,0);
   GDBUG.GPUPCEdit.Text := '$' + IntToHex(LoadAddress, 8);
   CodeViewCurPos := 0;
   noPCrefresh := true;
@@ -281,23 +315,24 @@ End;
 
 Function LoadBin(fl : string; adrs : integer) : boolean;
 var
-  f : File of byte;
-  str : string;
-  walk : ^byte;
-  value : integer;
+  f	: File of byte;
+  str	: string;
+  walk	: ^byte;
+  value	: integer;
+   size	: integer;
 Begin
   LoadAddress := adrs;
   if LoadAddress < $200000 then begin
-     MemorySize := $200000;
+     size := $200000;
      walk := @MAINram^;
   end
   else if LoadAddress < $f04000 then begin
-     MemorySize := $1F00;
+     size := $1F00;
      walk := @GPUram^;
      adrs := adrs - $f02100;
   end
   else begin
-     MemorySize := $2000;
+     size := $2000;
      walk := @DSPram^;
      adrs := adrs - $f1b000;
   end;
@@ -313,7 +348,7 @@ Begin
           value := value or (walk^ shl 8) ; Inc(walk);
           value := value or  walk^        ; Inc(walk);
 
-          if value = $42533934 then Begin
+          if value = $42533934 then Begin { BJL header ?}
        	     value :=          (walk^ shl 24); Inc(walk);
      	     value := value or (walk^ shl 16); Inc(walk);
      	     value := value or (walk^ shl 8) ; Inc(walk);
@@ -323,30 +358,30 @@ Begin
              Inc(walk,4);
              ProgramSize -= 12;
              if LoadAddress < $200000 then begin
-                 MemorySize := $200000;
+                 size := $200000;
                  walk := @MAINram^;
              end
              else if LoadAddress < $f04000 then begin
-                 MemorySize := $1000+$f00;
+                 size := $1000+$f00;
                  walk := @GPUram^;
                  adrs := adrs - $f02100;
              end
              else begin
-                 MemorySize := $2000;
+                 size := $2000;
                  walk := @DSPram^;
                  adrs := adrs - $f1b000;
              end
           end
-          else begin
-            Reset(f);
-            Dec(walk,4);
-          end
+     else begin
+	Reset(f);
+	Dec(walk,4);
+      end
     end;
 
-    if ProgramSize > (MemorySize - adrs) then
+    if ProgramSize > (size - adrs) then
     Begin
       str := 'File too large !';
-             MessageDlg('Error', str, mtError, [mbOK], 0);
+      MessageDlg('Error', str, mtError, [mbOK], 0);
       LoadBin := false;
     End
     Else
@@ -581,10 +616,7 @@ begin
     walk^ := (data shr  8) and $FF; Inc(walk);
     walk^ :=  data         and $FF; Inc(walk);
 
-    if (adrs >= $100000) and (adrs < $100100 ) then begin
-       adrs := (adrs - $100000) shr 2;
-       GDBUG.MemDump.EditorTextChanged(1+(adrs and 7),1+(adrs shr 3),IntToHex(data,8));
-    end;
+   updateMemDump(adrs);
   End
   Else If GDBUG.MemWarn.Checked = false then
   Begin
@@ -620,11 +652,7 @@ begin
 
     walk^ := (data shr  8) and $FF; Inc(walk);
     walk^ :=  data         and $FF; Inc(walk);
-     if (memadrs >= $100000) and (memadrs < $100100 ) then begin
-       data := GPUReadLong(memadrs);
-       memadrs := (memadrs - $100000) shr 2;
-       GDBUG.MemDump.EditorTextChanged(1+(memadrs and 7),1+(memadrs shr 3),IntToHex(data,8));
-    end;
+    updateMemDump(memadrs);
   End
   Else If GDBUG.MemWarn.Checked = false then
   Begin
@@ -651,11 +679,7 @@ begin
     walk := @MAINram^;
     Inc(walk, memadrs);
     walk^ := data and $FF;
-    if (memadrs >= $100000) and (memadrs < $100100 ) then begin
-       data := GPUReadLong(memadrs);
-       memadrs := (memadrs - $100000) shr 2;
-       GDBUG.MemDump.EditorTextChanged(1+(memadrs and 7),1+(memadrs shr 3),IntToHex(data,8));
-    end;
+    updateMemDump(memadrs);
   End
   Else If GDBUG.MemWarn.Checked = false then
   Begin
@@ -1411,7 +1435,8 @@ begin
   res := LoadBin(fileName, LoadAddress);
   if res then begin
     Disassemble;
-   ResetGPU;
+    ResetGPU;
+    ResetMemDump;
   end;
   LoadFile := res;
 end;
@@ -1529,8 +1554,9 @@ end;
 procedure TGDBUG.FormCreate(Sender: TObject);
 var
   node1, node2 : TTreeNode;
-  i,o : integer;
-  str : string;
+  i,o	       : integer;
+  str	       : string;
+   mem	       :  ^integer;
 begin
   MemorySize := $F1D000;
   GetMem(MAINram, $200000);
@@ -1542,11 +1568,15 @@ begin
     Application.Terminate;
   End;
 
+  FillByte(MAINram^,$200000,0);
+  FillByte(GPUram^, $1f00, 0);
+  FillByte(DSPram^, $2000, 0);
   RegBank0.Items.Clear;
   RegBank1.Items.Clear;
   node1 := RegBank0.Items.GetFirstNode;
   node2 := RegBank1.Items.GetFirstNode;
   gpurun := false;
+   memDumpBase := $100000;
 
   For i := 0 to 31 do
   Begin
@@ -1556,12 +1586,21 @@ begin
     RegBank0.Items.Add(node1, 'r' + IntToStr(i) + ': ' + str + '$00000000');
     RegBank1.Items.Add(node2, 'r' + IntToStr(i) + ': ' + str + '$00000000');
   End;
+   mem := @MAINram^;
+   i := memDumpBase shr 2;
+   Inc(mem, i);
   for i := 0 to 7 do begin
     for o := 0 to 7 do begin
         MemDump.Cells[1+i,1+o] := '00000000';
+        mem^ := 0;
+        Inc(mem,1);
     end;
   end;
-
+  i := memDumpBase;
+  for o:= 1 to 8 do begin
+     MemDump.Cells[0,o] := IntToHex(i,8);
+     i += $20;
+  end;
 
 end;
 

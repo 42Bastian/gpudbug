@@ -211,7 +211,7 @@ object GDBUG: TGDBUG
     Cursor = crHandPoint
     Left = 912
     Height = 21
-    Top = 384
+    Top = 408
     Width = 113
     Anchors = []
     BorderSpacing.InnerBorder = 4
@@ -224,7 +224,7 @@ object GDBUG: TGDBUG
     Cursor = crHandPoint
     Left = 912
     Height = 21
-    Top = 320
+    Top = 344
     Width = 113
     Anchors = []
     BorderSpacing.InnerBorder = 4
@@ -259,7 +259,7 @@ object GDBUG: TGDBUG
     Cursor = crHandPoint
     Left = 912
     Height = 21
-    Top = 416
+    Top = 440
     Width = 113
     Anchors = []
     BorderSpacing.InnerBorder = 4
@@ -322,7 +322,7 @@ object GDBUG: TGDBUG
     Cursor = crHandPoint
     Left = 912
     Height = 21
-    Top = 352
+    Top = 376
     Width = 113
     Anchors = []
     BorderSpacing.InnerBorder = 4
