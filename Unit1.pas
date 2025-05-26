@@ -26,6 +26,8 @@ uses
   StdCtrls, ComCtrls, LCLType, ValEdit, Grids;
 
 type
+ bptr = ^byte;
+ iptr = ^integer;
 
   { TGDBUG }
 
@@ -63,13 +65,12 @@ type
     ValueListEditor1: TValueListEditor;
     procedure Button2Click(Sender: TObject);
     procedure LoadClick(Sender: TObject);
+    procedure MemDumpOnMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
     procedure ReloadClick(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure GPUModeChange(Sender: TObject);
-    procedure MemDumpButtonClick(Sender: TObject; aCol, aRow: Integer);
     procedure MemDumpDblClick(Sender: TObject);
-    procedure MemDumpSelectCell(Sender: TObject; aCol, aRow: Integer;
-      var CanSelect: Boolean);
     procedure SkipButtonClick(Sender: TObject);
     procedure CodeViewMouseUp(Sender: TOBject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -102,13 +103,12 @@ var
   ProgramSize				   : integer;
   CodeViewCurPos			   : integer;
   LoadAddress				   : integer;
-  EndAddress				   : integer;
   CurRegBank				   : integer;
   RegBank				   : Array [0..1,0..31] of integer;
   RegStatus				   : integer;
   JMPPC, GPUPC, GPUBP, ZFlag, NFlag, CFlag : integer;
   jumpbuffered, noPCrefresh, gpurun	   : boolean;
-   memDumpBase				   : integer;
+  memDumpBase				   : integer;
 
 
 const
@@ -132,6 +132,14 @@ implementation
                                                               
        Function GPUReadLong(adrs : integer) : integer; forward;
        Procedure GPUWriteLong(adrs, data : integer); forward;
+
+procedure writeLong(p : bptr; value : integer);
+begin
+     p^ := (value shr 24) and $ff; Inc(p);
+     p^ := (value shr 16) and $ff; Inc(p);
+     p^ := (value shr  8) and $ff; Inc(p);
+     p^ := value and $ff; Inc(p);
+end;
 
 Procedure updateMemDump(memadrs : integer);
 Var
@@ -292,7 +300,8 @@ Begin
     GDBUG.RegBank0.Items.Item[i].ImageIndex := IMG_NODE_NOTHING;
     GDBUG.RegBank1.Items.Item[i].ImageIndex := IMG_NODE_NOTHING;
   End;
-
+  GDBUG.RegBank0Label.Font.Style := [fsBold];
+  GDBUG.RegBank1Label.Font.Style := [];
   UpdatePCView;
   UpdateRegView;
   UpdateFlagView;
@@ -581,24 +590,23 @@ End;
 Procedure GPUWriteLong(adrs, data : integer);
 Var
   walk : ^byte;
-  memadrs : integer;
+  memadrs,limit : integer;
   str : string;
 begin
   memadrs := adrs;
-    if adrs < $200000 then begin
-
-   walk := @MAINram^;
-   MemorySize := $200000;
+  if adrs < $200000 then begin
+    walk := @MAINram^;
+    limit := $200000;
   end
   else if adrs < $f04000 then begin
-   walk := @GPUram^;
-   MemorySize := $1F00;
-   adrs := adrs - $f02100;
+    walk := @GPUram^;
+    limit := $f04000;
+    adrs -= $f02100;
   end
   else begin
     walk := @DSPram^;
-    MemorySize := $2000;
-    adrs := adrs - $f1b000;
+    limit := $f1d000;
+    adrs -= $f1b000;
   end;
 
   if (adrs and 3 <> 0 ) and (GDBUG.MemWarn.Checked = false) then
@@ -607,7 +615,7 @@ begin
     MessageDlg('Warning', str, mtWarning, [mbOK], 0);
   End;
 
-  if (adrs >= 0) and ((adrs + 4) <= MemorySize) then
+  if (adrs >= 0) and ((adrs + 4) <= limit) then
   Begin
     Inc(walk, adrs);
 
@@ -616,14 +624,14 @@ begin
     walk^ := (data shr  8) and $FF; Inc(walk);
     walk^ :=  data         and $FF; Inc(walk);
 
-   updateMemDump(adrs);
+    updateMemDump(adrs);
+    MemWriteCheck;
   End
   Else If GDBUG.MemWarn.Checked = false then
   Begin
-    str := 'WriteLong outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
+    str := 'WriteLong outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8);
     MessageDlg('Error', str, mtError, [mbOK], 0);
   End;
-  MemWriteCheck;
 End;
 
 
@@ -633,60 +641,58 @@ Var
   memadrs : integer;
   str : string;
 begin
-  memadrs := adrs;
-  adrs := adrs and $FFFFFFFE;
-  if (memadrs <> adrs) and (GDBUG.MemWarn.Checked = false) then
+  if ((adrs and 1) <> 0) and (GDBUG.MemWarn.Checked = false) then
   Begin
-    str := 'WriteWord not on a Word aligned address !' + #13 + #10 + 'Address = $' + IntToHex(memadrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
+    str := 'WriteWord not on a Word aligned address !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8) + #13 + #10 + 'Should be = $' + IntToHex(adrs, 8);
     MessageDlg('Warning', str, mtWarning, [mbOK], 0);
   End;
 
-  if CheckInternalRam(memadrs) = true then
+  if CheckInternalRam(adrs) = true then begin
     MessageDlg('Warning', 'WriteWord not allowed in internal ram !', mtWarning, [mbOK], 0);
+  end
+  else begin
+    if (adrs >= 0) and ((adrs + 2) <= $200000) then
+    Begin
+      walk := @MAINram^;
+      Inc(walk, adrs);
 
-  memadrs := adrs;
-  if (memadrs >= 0) and ((memadrs + 2) < $200000) then
-  Begin
-    walk := @MAINram^;
-    Inc(walk, memadrs);
-
-    walk^ := (data shr  8) and $FF; Inc(walk);
-    walk^ :=  data         and $FF; Inc(walk);
-    updateMemDump(memadrs);
-  End
-  Else If GDBUG.MemWarn.Checked = false then
-  Begin
-    str := 'WriteWord outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
-    MessageDlg('Error', str, mtError, [mbOK], 0);
-  End;
-  MemWriteCheck;
+      walk^ := (data shr  8) and $FF; Inc(walk);
+      walk^ :=  data         and $FF; Inc(walk);
+      updateMemDump(adrs);
+      MemWriteCheck;
+    End
+    Else If GDBUG.MemWarn.Checked = false then
+    Begin
+      str := 'WriteWord outside allocated buffer !'#13#10'Address = $' + IntToHex(adrs, 8);
+      MessageDlg('Error', str, mtError, [mbOK], 0);
+    End;
+  end;
 End;
 
 
 Procedure GPUWriteByte(adrs, data : integer);
 Var
   walk : ^byte;
-  value, memadrs : integer;
   str : string;
 begin
-  memadrs := adrs;
 
-  if CheckInternalRam(memadrs) = true then
-    MessageDlg('Warning', 'WriteByte not allowed in internal ram !', mtWarning, [mbOK], 0);
+  if CheckInternalRam(adrs) = true then
+    MessageDlg('Warning', 'WriteByte not allowed in internal ram !', mtWarning,
+                [mbOK], 0);
 
-  if (memadrs >= 0) and (memadrs < MemorySize) then
+  if (adrs >= 0) and (adrs < $200000) then
   Begin
     walk := @MAINram^;
-    Inc(walk, memadrs);
+    Inc(walk, adrs);
     walk^ := data and $FF;
-    updateMemDump(memadrs);
+    updateMemDump(adrs);
+    MemWriteCheck;
   End
   Else If GDBUG.MemWarn.Checked = false then
   Begin
-    str := 'WriteByte outside allocated buffer !' + #13 + #10 + 'Address = $' + IntToHex(adrs, 8);
+    str := 'WriteByte outside allocated buffer !'#13#10'Address = $' + IntToHex(adrs, 8);
     MessageDlg('Error', str, mtError, [mbOK], 0);
   End;
-  MemWriteCheck;
 End;
 
 
@@ -1250,11 +1256,11 @@ Begin
   size := ProgramSize;
 
   if LoadAddress <= $200000 then begin
-  walk := @MAINram^;
-  value := LoadAddress;
+    walk := @MAINram^;
+    value := LoadAddress;
   end else if LoadAddress < $f04000 then begin
-  walk := @GPUram^;
-  value :=  LoadAddress - $f02100
+    walk := @GPUram^;
+    value :=  LoadAddress - $f02100
 
   end else begin
     walk := @DSPram^;
@@ -1476,6 +1482,51 @@ begin
   end;
 end;
 
+procedure TGDBUG.MemDumpOnMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+VAr
+   row,col : integer;
+   addr,value : integer;
+   str : string;
+   r : boolean;
+begin
+   MemDump.MouseToCell(x,y, col, row );
+   if (col = 0) and (row <> 0) then begin
+    str := '$' + IntToHex(memDumpBase+(row-1)*32,8);
+    r := InputQuery('Change start address =',str, str);
+    if r then
+    Begin
+       value := StrToInt(str);
+       if ((value >= 0) and (value < $200000)) or
+           ((value >= $f03000) and (value < $f04000))
+       then begin
+          value := value and $fffffff0;
+          memDumpBase := value - (row-1)*32;
+          for row:= 1 to 8 do begin
+            memDump.Cells[0,row] := '$'+IntToHex(memDumpBase+(row-1)*32,8);
+          end;
+          addr := memDumpBase;
+          for row:= 1 to 8 do begin
+            for col:= 1 to 8 do begin
+              memDump.Cells[col,row] := IntToHex(GPUReadLong(addr),8);
+              addr += 4;
+            end;
+          end;
+       end;
+    end;
+   end
+   else if (col > 0) and (row > 0) then begin
+     addr := memDumpBase + (col-1)*4 + (row-1)*32;
+     str := '$'+memDump.Cells[col,row];
+     r := InputQuery('Change mem', '$' + IntToHex(addr,8) + ' =', str);
+     if r then
+     Begin
+       value := StrToInt(str);
+       GPUWriteLong(addr, value);
+     End;
+   end;
+end;
+
 procedure TGDBUG.Button4Click(Sender: TObject);
 begin
   if gpurun = true then StopGPU;
@@ -1487,20 +1538,9 @@ begin
 
 end;
 
-procedure TGDBUG.MemDumpButtonClick(Sender: TObject; aCol, aRow: Integer);
-begin
-
-end;
-
 procedure TGDBUG.MemDumpDblClick(Sender: TObject);
 begin
-
-end;
-
-procedure TGDBUG.MemDumpSelectCell(Sender: TObject; aCol, aRow: Integer;
-  var CanSelect: Boolean);
-begin
-
+  MessageDlg('Warning', 'Clicked!', mtWarning, [mbOK], 0)
 end;
 
 procedure TGDBUG.SkipButtonClick(Sender: TObject);
@@ -1508,7 +1548,7 @@ var
   w : word;
 begin
   if CodeViewCurPos = CodeView.Items.Count then
-    MessageDlg('Warning', 'Reached program end !', mtWarning, [mbOK], 0)
+   MessageDlg('Warning', 'Reached program end !', mtWarning, [mbOK], 0)
   Else
   Begin
     w := GPUReadWord(GPUPC, true);

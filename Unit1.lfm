@@ -361,6 +361,7 @@ object GDBUG: TGDBUG
     Font.CharSet = ARABIC_CHARSET
     Font.Height = -15
     Font.Name = 'Arial'
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goAlwaysShowEditor]
     ParentFont = False
     RowCount = 9
     TabOrder = 16
@@ -368,7 +369,7 @@ object GDBUG: TGDBUG
     TitleFont.Height = -15
     TitleFont.Name = 'Arial Black'
     OnDblClick = MemDumpDblClick
-    OnSelectCell = MemDumpSelectCell
+    OnMouseUp = MemDumpOnMouseUp
     RowHeights = (
       28
       28
