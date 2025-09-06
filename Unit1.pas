@@ -39,7 +39,7 @@ type
     CodeView: TTreeView;
     ImageList: TImageList;
     JUMPLabel: TLabel;
-    Loading0: TProgressBar;
+    {Loading0: TProgressBar;}
     ToggleBox1: TToggleBox;
     RegBank0: TTreeView;
     RegBank1: TTreeView;
@@ -206,7 +206,7 @@ Var
 Begin
   if  LoadAddress < $200000 then begin
    walk := @MAINram^;
-   offset := 0;
+   offset := LoadAddress;
   end
   else if LoadAddress < $f04000 then begin
    walk := @GPUram^;
@@ -404,6 +404,7 @@ Begin
     LoadBin := false;
   End;
   LoadBin := true;
+  GPUPC := LoadAddress;
 End;
 
 
@@ -1392,7 +1393,7 @@ Begin
 
     Dec(size, ecart);
     Inc(adrs, ecart);
-    GDBUG.Loading0.Position := 100 - ((size * 100) div ProgramSize);
+  {  GDBUG.Loading0.Position := 100 - ((size * 100) div ProgramSize);   }
   End;
 
   curnode := GDBUG.CodeView.Items.GetFirstNode;
